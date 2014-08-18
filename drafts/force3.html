@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+	
+
+	<!-- copy this template into a new file to start a new project -->
+	<head>
+		<script type="text/javascript" src="d3/d3.v3.js"></script>
+		
+	</head>
+	<body> 
+		<script type="text/javascript"> 
+
+			// load dataset. 
+
+			// nodes represent nodes in the drupal db. 
+			// links represent user motion from node to node.
+			// links all have a time associated with them. 
+
+			var dataset = { 
+				nodes: [ 
+				{ name: "Adam"},
+				{ name: "Bob" }, 
+				{ name: "Carrie" },
+				{ name: "Donovan" },
+				{ name: "Edward" },
+				{ name: "Felicity" },
+				{ name: "George" },
+				{ name: "Hannah" },
+				{ name: "Iris" },
+				{ name: "Jerry" },
+			],
+
+				// using links instead of edges for name of this variable, 
+				// because d3 force layout calls them links.
+				links: [
+				{ source: 0, target: 1, time: 1 },
+				{ source: 2, target: 3, time: 3 },
+				{ source: 3, target: 4, time: 3 },
+				{ source: 3, target: 5, time: 4 }
+			]
+		}; 
+
+
+		// create the canvas
+
+		var svg = d3.select("body").append("svg");
+
+		var height = 500;
+		var width = 500;
+
+		svg.style("width", width)
+			.style("height", height)
+			.style("border", "5px black solid")
+			;
+
+
+	// create the force layout
+		var force = d3.layout.force();
+		var links =  svg.selectAll("line")
+				.data(dataset.links)
+				.enter().append("line")
+				.style("stroke", "#ccc")
+				.style("stroke-width", 3)
+				;
+
+
+		function drawLinks() {
+
+			links.data(dataset.links)
+				.enter().append("line")
+				;
+
+			// update
+			links.attr("id", function(d) {return d.id; })
+				.style("stroke", "#ccc")
+				.style("stroke-width", 3)
+
+
+		}
+	
+
+		var nodes = svg.selectAll("circle")
+			.data(dataset.nodes)
+			.enter().append("circle")
+			.attr("r", 10)
+			.style("fill", "salmon")
+			.style("stroke", "#000")
+			.style("stroke-width", 2)
+			.call(force.drag)
+			;
+
+		drawLinks();
+
+		function start(nodes, links){
+
+			drawLinks();
+
+			force.nodes(nodes)
+			.links(links)
+			.charge(-400)
+			.linkDistance(120)
+			.size([width, height])
+			.start()
+			;
+			
+	
+		}
+
+
+		force.on("tick", tick);
+		
+		function tick() {
+		  nodes.attr("cx", function(d) { return d.x; })
+			  .attr("cy", function(d) { return d.y; })
+
+		  links.attr("x1", function(d) { return d.source.x; })
+			  .attr("y1", function(d) { return d.source.y; })
+			  .attr("x2", function(d) { return d.target.x; })
+			  .attr("y2", function(d) { return d.target.y; });
+		}
+
+
+		function selectTimeFrame(timeFrame)
+		{
+			var selectedLinks = [];
+			for (var i = 0; i < dataset.links.length; i++) {
+				if (dataset.links[i].time > timeFrame[0] &&
+					dataset.links[i].time <= timeFrame[1])
+				{
+					selectedLinks.push(dataset.links[i]);
+				}
+			}
+			return selectedLinks;
+		}
+		
+		var timeFrame = [0, 5];
+		
+		start(dataset.nodes, selectTimeFrame(timeFrame));
+
+
+		// push a new link to dataset.links
+		setTimeout(function () {
+			dataset.links.push({source: 7, target: 5, time: 2});
+			start(dataset.nodes, selectTimeFrame(timeFrame));
+		}, 1000);
+
+
+		
+		
+		</script>
+	</body>
+<html>
+

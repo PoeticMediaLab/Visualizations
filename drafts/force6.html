@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+	
+
+	<!-- copy this template into a new file to start a new project -->
+	<head>
+		<script type="text/javascript" src="d3/d3.v3.js"></script>
+
+		<style> 
+
+
+
+		</style>
+	</head>
+	<body> 
+		<script type="text/javascript"> 
+
+		// load dataset
+			var	nodes = [ 
+				{ id: "0"},
+				{ id: "1" }, 
+				{ id: "2" },
+				{ id: "3" },
+				{ id: "4" },
+				{ id: "5" },
+				{ id: "6" },
+				{ id: "7" },
+				{ id: "8" },
+				{ id: "9" }
+			];
+
+				// using links instead of edges for name of this variable, 
+				// because d3 force layout calls them links.
+			var links = [
+				{ source: nodes[0], target: nodes[1], time: 1 },
+				{ source: nodes[2], target: nodes[3], time: 7 },
+				{ source: nodes[3], target: nodes[4], time: 8 },
+				{ source: nodes[3], target: nodes[5], time: 9 }
+			];
+
+
+			// timeframe determines what links are visible
+			var timeFrame = [0, 5]
+
+		
+		</script>
+	</body>
+<html>
+
