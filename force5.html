@@ -1,0 +1,271 @@
+<!doctype html>
+<html>
+	
+
+	<!-- copy this template into a new file to start a new project -->
+	<head>
+		<script type="text/javascript" src="d3/d3.v3.js"></script>
+	</head>
+	<body> 
+		<p id="remove">click here to remove a link</p>
+		<p id="add">click here to add a link</p>
+		<p id="timeframe">Click here to advance the timeframe</p>
+
+		<script type="text/javascript"> 
+
+			// load dataset. 
+
+			// nodes represent nodes in the drupal db. 
+			// links represent user motion from node to node.
+			// links all have a time associated with them. 
+
+			// var dataset = { 
+			var	nodes = [ 
+				{ id: "0"},
+				{ id: "1" }, 
+				{ id: "2" },
+				{ id: "3" },
+				{ id: "4" },
+				{ id: "5" },
+				{ id: "6" },
+				{ id: "7" },
+				{ id: "8" },
+				{ id: "9" }
+			];
+
+				// using links instead of edges for name of this variable, 
+				// because d3 force layout calls them links.
+			var links = [
+				{ source: nodes[0], target: nodes[1], time: 1 },
+				{ source: nodes[2], target: nodes[3], time: 7 },
+				{ source: nodes[3], target: nodes[4], time: 8 },
+				{ source: nodes[3], target: nodes[5], time: 9 }
+			];
+		// }; 
+
+
+
+			var timeFrame = [0, 5];
+
+
+			// set up the remove button
+			d3.select("#remove") 
+				.on("click", function() {
+					links.pop();
+					start(nodes, links);
+				});
+
+			d3.select("#add") 
+				.on("click", function() {
+
+					var done = true;
+					
+					do {
+						var randomSource = Math.floor(Math.random() * nodes.length);
+						var randomTarget = Math.floor(Math.random() * nodes.length);
+
+						console.log("source: " + randomSource + " target: " + randomTarget);
+
+					for(var i; i < links.length; i++) {
+						if ((nodes[i].source === randomSource && nodes[i].target === randomTarget) 
+							||
+							(nodes[i].target === randomSource && nodes[i].source === randomTarget))
+							 {
+								done = false;
+							} 	// sending us through the loop again
+
+						}
+					} while (!done);
+
+					
+					
+
+					links.push({source: nodes[randomSource], target: nodes[randomTarget], time: 2});
+					start(nodes, links);
+				});
+		
+		d3.select("#timeframe") 
+			.on("click", function() {
+				timeFrame[1] = timeFrame[1] + 1;
+				start(nodes, links);
+
+				d3.select("#timeframe")
+					.text("timeFrame[1]: " + timeFrame[1]);
+
+			});
+
+
+		// create the canvas
+
+		var svg = d3.select("body").append("svg");
+		
+		// var controlsvg = d3.select("body").append("svg");
+
+		var height = 500;
+		var width = 500;
+
+
+		svg.style("width", width)
+			.style("height", height)
+			.style("border", "5px black solid")
+			;
+/*
+		controlsvg.style("width", width)
+			.style("height", height)
+			.style("border", "5px black solid")
+			;
+			*/
+
+	
+
+	// create the force layout
+		var force = d3.layout.force()
+			.charge(-400)
+			.linkDistance(120)
+			.size([width, height])
+			.nodes(nodes)
+			.links(links)
+			.on("tick", tick)
+			;
+
+		var link = svg.selectAll(".link")
+				// .data(dataset.links)
+				// .enter().append("line")
+				// .style("stroke", "#ccc")
+				// .style("stroke-width", 3)
+				;
+
+
+		// function drawLinks() {
+		// 	// console.log(links);
+		// //   links = links.data(force.links(), function(d) { return d.source.id + "-" + d.target.id; });
+  // // // console.log(links);
+		// //   links.enter().append("line", ".node").attr("class", "link");
+  // // links.exit().remove();
+		// 	// var links = svg.selectAll("line")
+		// 	// 	links.data(dataset.links)
+		// 	// 		.enter().append("line")
+		// 	// 	;
+		// 	link = link.data(force.links())
+		// 		.enter().append("line")
+		// 		.style("stroke", "#ccc")
+		// 		.style("stroke-width", 3)
+		// 		;
+
+		// 	// // update
+		// 	link.attr("id", function(d) { return d.id; })
+		// 		.style("stroke", "#ccc")
+		// 		.style("stroke-width", 3);
+
+		// 	link.exit().remove();
+
+		// 	// tick();
+
+		// }
+	
+		// drawLinks();
+
+//		var node = svg.selectAll("circle")
+//			.data(nodes)
+//			.enter().append("circle")
+//			.attr("r", 10)
+//			.style("fill", "salmon")
+//			.style("stroke", "#000")
+//			.style("stroke-width", 2)
+//			.call(force.drag)
+//			;
+
+
+		// necessary to get d3 to draw elements in the right order (nodes on 
+		// top of links, rather than under them)
+
+		svg.append("g").attr("id", "links");
+		svg.append("g").attr("id", "nodes");
+
+		var link = svg.select("#links").selectAll(".link");
+		var node = svg.select("#nodes").selectAll(".node");
+
+		function start(nodes, links){
+
+
+			// update links
+			link = link.data(links, function(d) { return d.source.id + "-" + d.target.id; });
+
+			link.enter().append("line")
+				.style("stroke", "#ccc")
+				.style("stroke-width", 3)
+				;
+			link.exit().remove();
+			// update
+			link.attr("id", function(d) { return d.id; });
+			link.classed("link", true );
+
+			;
+
+			node = node.data(nodes, function(d) { return d.id;});
+
+
+			node.enter().append("circle");
+		    node.attr("r", 10)
+				.style("fill", "salmon")
+				.style("stroke", "#000")
+				.style("stroke-width", 2)
+				.classed("node", true)
+				.call(force.drag);
+
+
+
+			node.exit().transition()
+			.style("stroke-width", 0)
+			.remove();
+
+			force.start();
+
+		}
+
+
+		// force.on("tick", tick);
+		
+		function tick() {
+		  node.attr("cx", function(d) { return d.x; })
+			  .attr("cy", function(d) { return d.y; })
+
+		  link.attr("x1", function(d) { return d.source.x; })
+			  .attr("y1", function(d) { return d.source.y; })
+			  .attr("x2", function(d) { return d.target.x; })
+			  .attr("y2", function(d) { return d.target.y; });
+		}
+
+
+		function selectTimeFrame(timeFrame)
+		{
+			var selectedLinks = [];
+			for (var i = 0; i < links.length; i++) {
+				if (links[i].time > timeFrame[0] &&
+					links[i].time <= timeFrame[1])
+				{
+					selectedLinks.push(links[i]);
+				}
+			}
+			return selectedLinks;
+		}
+		
+		
+		// dataset = selectTimeFrame(timeFrame);
+		start(nodes, selectTimeFrame(timeFrame));
+
+		// push a new link to dataset.links
+		setTimeout(function () {
+			links.push({source: nodes[7], target: nodes[5], time: 2});
+			start(nodes, selectTimeFrame(timeFrame));
+		}, 1000);
+
+		// drawLinks();
+
+		// start(dataset.nodes, selectTimeFrame(timeFrame));
+		
+		
+		</script>
+	</body>
+<html>
+

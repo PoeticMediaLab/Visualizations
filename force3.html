@@ -66,9 +66,8 @@
 
 		function drawLinks() {
 
-			var links = svg.selectAll("line")
-				.data(dataset.links);
-				links.enter().append("line")
+			links.data(dataset.links)
+				.enter().append("line")
 				;
 
 			// update
@@ -76,11 +75,9 @@
 				.style("stroke", "#ccc")
 				.style("stroke-width", 3)
 
-		//	tick();
 
 		}
 	
-		drawLinks();
 
 		var nodes = svg.selectAll("circle")
 			.data(dataset.nodes)
@@ -92,8 +89,11 @@
 			.call(force.drag)
 			;
 
+		drawLinks();
+
 		function start(nodes, links){
 
+			drawLinks();
 
 			force.nodes(nodes)
 			.links(links)
@@ -103,7 +103,6 @@
 			.start()
 			;
 			
-			drawLinks();
 	
 		}
 
@@ -145,9 +144,7 @@
 			start(dataset.nodes, selectTimeFrame(timeFrame));
 		}, 1000);
 
-		drawLinks();
 
-		start(dataset.nodes, selectTimeFrame(timeFrame));
 		
 		
 		</script>
